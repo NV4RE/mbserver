@@ -25,7 +25,7 @@ func NewRTUFrame(packet []byte) (*RTUFrame, []byte, error) {
 		return nil, packet, ErrPacketTooShort
 	}
 
-	leftOver := packet
+	var leftOver []byte
 	// Case of read always 8 byte
 	if packet[1] <= 4 {
 		if len(packet) > 8 {
@@ -55,8 +55,8 @@ func NewRTUFrame(packet []byte) (*RTUFrame, []byte, error) {
 
 // Copy the RTUFrame.
 func (frame *RTUFrame) Copy() Framer {
-	copy := *frame
-	return &copy
+	cf := *frame
+	return &cf
 }
 
 // Bytes returns the Modbus byte stream based on the RTUFrame fields
