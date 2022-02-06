@@ -3,6 +3,7 @@ package mbserver
 import (
 	"io"
 	"log"
+	"time"
 
 	"github.com/goburrow/serial"
 )
@@ -10,6 +11,7 @@ import (
 // ListenRTU starts the Modbus server listening to a serial device.
 // For example:  err := s.ListenRTU(&serial.Config{Address: "/dev/ttyUSB0"})
 func (s *Server) ListenRTU(serialConfig *serial.Config) (err error) {
+	serialConfig.Timeout = 100 * time.Millisecond
 	port, err := serial.Open(serialConfig)
 	if err != nil {
 		log.Fatalf("failed to open %s: %v\n", serialConfig.Address, err)
@@ -39,25 +41,29 @@ SkipFrameError:
 		buffer := make([]byte, 512)
 
 		bytesRead, err := port.Read(buffer)
-		if err != nil {
-			if err != io.EOF || err != serial.ErrTimeout {
-				log.Printf("serial read error %v\n", err)
-			}
+
+		switch err {
+		case io.EOF, nil:
+		// do nothing
+		case serial.ErrTimeout:
+			leftover = make([]byte, 0)
+			continue SkipFrameError
+		default:
+			log.Printf("serial read error %v\n", err)
 			return
 		}
 
 		if bytesRead != 0 {
+			//fmt.Printf("leftover: %x\n", leftover)
+			leftover = append(leftover, buffer[:bytesRead]...)
 			// Set the length of the packet to the number of read bytes.
-			packet := buffer[:bytesRead]
-
-			frame, lo, err := NewRTUFrame(append(leftover, packet...))
+			//packet := buffer[:bytesRead]
+			//fmt.Printf("packet: %x, bytesRead: %d\n", packet, bytesRead)
+			//fmt.Printf("data: %x\n", leftover)
+			frame, lo, err := NewRTUFrame(leftover)
 			if err != nil {
-				log.Printf("bad serial frame error %v\n", err)
-				//The next line prevents RTU server from exiting when it receives a bad frame. Simply discard the erroneous
-				//frame and wait for next frame by jumping back to the beginning of the 'for' loop.
-				log.Printf("Keep the RTU server running!!\n")
+				//log.Printf("bad serial frame error %v\n", err)
 				continue SkipFrameError
-				//return
 			}
 			leftover = lo
 

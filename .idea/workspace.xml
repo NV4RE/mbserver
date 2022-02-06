@@ -4,7 +4,11 @@
     <option name="autoReloadType" value="ALL" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="f7b932ce-fbda-47b1-ada5-18afeae2c517" name="Changes" comment="Update go mod" />
+    <list default="true" id="f7b932ce-fbda-47b1-ada5-18afeae2c517" name="Changes" comment="Fix left over">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/framertu.go" beforeDir="false" afterPath="$PROJECT_DIR$/framertu.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/servertu.go" beforeDir="false" afterPath="$PROJECT_DIR$/servertu.go" afterDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -71,7 +75,9 @@
     <MESSAGE value="Add left over byte" />
     <MESSAGE value="fix leftOver not clear" />
     <MESSAGE value="Update go mod" />
-    <option name="LAST_COMMIT_MESSAGE" value="Update go mod" />
+    <MESSAGE value="Log" />
+    <MESSAGE value="Fix left over" />
+    <option name="LAST_COMMIT_MESSAGE" value="Fix left over" />
   </component>
   <component name="VgoProject">
     <integration-enabled>true</integration-enabled>

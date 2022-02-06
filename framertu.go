@@ -3,7 +3,6 @@ package mbserver
 import (
 	"encoding/binary"
 	"errors"
-	"fmt"
 )
 
 var (
@@ -22,14 +21,14 @@ type RTUFrame struct {
 // NewRTUFrame converts a packet to a Modbus TCP frame.
 func NewRTUFrame(packet []byte) (*RTUFrame, []byte, error) {
 	// Check the that the packet length.
+
 	if len(packet) < 5 {
 		return nil, packet, ErrPacketTooShort
 	}
 
-	fmt.Printf("%x\n", packet)
 	leftOver := make([]byte, 0)
 	// Case of read always 8 byte
-	if packet[1] <= 4 {
+	if packet[1] <= 5 {
 		if len(packet) > 8 {
 			leftOver = packet[8:]
 			packet = packet[:8]
