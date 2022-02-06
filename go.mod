@@ -1,4 +1,4 @@
-module mbserver
+module github.com/NV4RE/mbserver
 
 go 1.17
 
