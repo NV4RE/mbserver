@@ -3,6 +3,7 @@ package mbserver
 import (
 	"encoding/binary"
 	"errors"
+	"fmt"
 )
 
 var (
@@ -24,7 +25,7 @@ func NewRTUFrame(packet []byte) (*RTUFrame, []byte, error) {
 	if len(packet) < 5 {
 		return nil, packet, ErrPacketTooShort
 	}
-
+	fmt.Printf("%x\n", packet)
 	var leftOver []byte
 	// Case of read always 8 byte
 	if packet[1] <= 4 {
