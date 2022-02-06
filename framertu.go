@@ -25,8 +25,9 @@ func NewRTUFrame(packet []byte) (*RTUFrame, []byte, error) {
 	if len(packet) < 5 {
 		return nil, packet, ErrPacketTooShort
 	}
+
 	fmt.Printf("%x\n", packet)
-	var leftOver []byte
+	leftOver := make([]byte, 0)
 	// Case of read always 8 byte
 	if packet[1] <= 4 {
 		if len(packet) > 8 {
@@ -42,7 +43,7 @@ func NewRTUFrame(packet []byte) (*RTUFrame, []byte, error) {
 	crcExpect := binary.LittleEndian.Uint16(packet[pLen-2 : pLen])
 	crcCalc := crcModbus(packet[0 : pLen-2])
 	if crcCalc != crcExpect {
-		return nil, []byte{}, ErrCrcNotMatch
+		return nil, make([]byte, 0), ErrCrcNotMatch
 	}
 
 	frame := &RTUFrame{

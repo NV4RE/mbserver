@@ -26,7 +26,7 @@ func (s *Server) ListenRTU(serialConfig *serial.Config) (err error) {
 }
 
 func (s *Server) acceptSerialRequests(port serial.Port) {
-	leftover := make([]byte, 512)
+	leftover := make([]byte, 0)
 
 SkipFrameError:
 	for {
@@ -47,7 +47,6 @@ SkipFrameError:
 		}
 
 		if bytesRead != 0 {
-
 			// Set the length of the packet to the number of read bytes.
 			packet := buffer[:bytesRead]
 
