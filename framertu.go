@@ -2,7 +2,12 @@ package mbserver
 
 import (
 	"encoding/binary"
-	"fmt"
+	"errors"
+)
+
+var (
+	ErrPacketTooShort = errors.New("packet too short")
+	ErrCrcNotMatch    = errors.New("crc not match")
 )
 
 // RTUFrame is the Modbus TCP frame.
@@ -14,10 +19,21 @@ type RTUFrame struct {
 }
 
 // NewRTUFrame converts a packet to a Modbus TCP frame.
-func NewRTUFrame(packet []byte) (*RTUFrame, error) {
+func NewRTUFrame(packet []byte) (*RTUFrame, []byte, error) {
 	// Check the that the packet length.
 	if len(packet) < 5 {
-		return nil, fmt.Errorf("RTU Frame error: packet less than 5 bytes: %v", packet)
+		return nil, packet, ErrPacketTooShort
+	}
+
+	leftOver := packet
+	// Case of read always 8 byte
+	if packet[1] <= 4 {
+		if len(packet) > 8 {
+			leftOver = packet[8:]
+			packet = packet[:8]
+		} else if len(packet) < 8 {
+			return nil, packet, ErrPacketTooShort
+		}
 	}
 
 	// Check the CRC.
@@ -25,16 +41,16 @@ func NewRTUFrame(packet []byte) (*RTUFrame, error) {
 	crcExpect := binary.LittleEndian.Uint16(packet[pLen-2 : pLen])
 	crcCalc := crcModbus(packet[0 : pLen-2])
 	if crcCalc != crcExpect {
-		return nil, fmt.Errorf("RTU Frame error: CRC (expected 0x%x, got 0x%x)", crcExpect, crcCalc)
+		return nil, []byte{}, ErrCrcNotMatch
 	}
 
 	frame := &RTUFrame{
-		Address:  uint8(packet[0]),
-		Function: uint8(packet[1]),
+		Address:  packet[0],
+		Function: packet[1],
 		Data:     packet[2 : pLen-2],
 	}
 
-	return frame, nil
+	return frame, leftOver, nil
 }
 
 // Copy the RTUFrame.

@@ -26,7 +26,9 @@ func (s *Server) ListenRTU(serialConfig *serial.Config) (err error) {
 }
 
 func (s *Server) acceptSerialRequests(port serial.Port) {
-	SkipFrameError:
+	leftover := make([]byte, 512)
+
+SkipFrameError:
 	for {
 		select {
 		case <-s.portsCloseChan:
@@ -38,7 +40,7 @@ func (s *Server) acceptSerialRequests(port serial.Port) {
 
 		bytesRead, err := port.Read(buffer)
 		if err != nil {
-			if err != io.EOF {
+			if err != io.EOF || err != serial.ErrTimeout {
 				log.Printf("serial read error %v\n", err)
 			}
 			return
@@ -49,15 +51,16 @@ func (s *Server) acceptSerialRequests(port serial.Port) {
 			// Set the length of the packet to the number of read bytes.
 			packet := buffer[:bytesRead]
 
-			frame, err := NewRTUFrame(packet)
+			frame, lo, err := NewRTUFrame(append(leftover, packet...))
 			if err != nil {
 				log.Printf("bad serial frame error %v\n", err)
-				//The next line prevents RTU server from exiting when it receives a bad frame. Simply discard the erroneous 
+				//The next line prevents RTU server from exiting when it receives a bad frame. Simply discard the erroneous
 				//frame and wait for next frame by jumping back to the beginning of the 'for' loop.
 				log.Printf("Keep the RTU server running!!\n")
 				continue SkipFrameError
 				//return
 			}
+			leftover = lo
 
 			request := &Request{port, frame}
 
